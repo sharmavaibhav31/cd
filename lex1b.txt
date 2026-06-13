@@ -1,0 +1,20 @@
+%{
+    #include<stdio.h>
+    int count=0;
+%}
+
+%%
+[a-zA-Z]+ {count++;}
+[\t\n\r]|. ;
+%%
+
+int yywrap() {
+    return 1;
+}
+
+int main(){
+    printf("Enter the input: ");
+    yylex();
+    printf("Count of words %d",count);
+    return 1;
+}

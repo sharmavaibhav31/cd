@@ -1,0 +1,59 @@
+pgm.l:
+    %{
+    #include "y.tab.h"
+    #include <stdio.h>
+    %}
+
+    %%
+
+    [ \t\r\n]+          ; /* Skip whitespace */
+
+    "int"|"float"|"char"|"double"   { return TYPE; }
+    ","                             { return COMMA; }
+    ";"                             { return SEMI; }
+
+    [a-zA-Z_][a-zA-Z0-9_]*          { return ID; }
+
+    .                               { return INVALID; }
+
+    %%
+
+    int yywrap(void) {
+        return 1;
+    }
+
+pgm.y:
+    %{
+    #include <stdio.h>
+    #include <stdlib.h>
+
+    int yylex();
+    void yyerror(const char *s);
+    %}
+
+    %token TYPE ID COMMA SEMI INVALID
+
+    %%
+
+    start  : decl SEMI           { printf("VALID Declaration\n"); exit(0); }
+        ;
+
+    decl   : TYPE idlist
+        ;
+
+    idlist : ID
+        | idlist COMMA ID
+        ;
+
+    %%
+
+    int main() {
+        printf("Enter declaration: ");
+        yyparse();
+        return 0;
+    }
+
+    void yyerror(const char *s) {
+        printf("Invalid declaration\n");
+    }
+

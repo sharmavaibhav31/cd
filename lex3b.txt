@@ -1,0 +1,23 @@
+%{
+    #include<stdio.h>
+    int negcount=0;
+    int poscount=0;
+%}
+
+%%
+[-][0-9]+ {negcount ++;}
+[0-9]+ {poscount ++;}
+[ \t\n\r]+ ;
+. ;
+%%
+
+int yywrap() {
+    return 1;
+}
+
+int main(){
+    printf("Enter the input: ");
+    yylex();
+    printf("poscount = %d \n negcount = %d \n ",poscount,negcount);
+    return 1;
+}

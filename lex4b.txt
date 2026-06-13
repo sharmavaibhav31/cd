@@ -1,0 +1,23 @@
+%{
+    #include<stdio.h>
+    int vocount=0;
+    int conscount=0;
+%}
+
+%%
+[aeiouAEIOU] {vocount ++;}
+[a-zA-Z] {conscount ++;}
+[ \t\n\r]+ ;
+. ;
+%%
+
+int yywrap() {
+    return 1;
+}
+
+int main(){
+    printf("Enter the input: ");
+    yylex();
+    printf("vowel = %d \n Consonants = %d \n ",vocount,conscount);
+    return 1;
+}

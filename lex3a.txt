@@ -1,0 +1,20 @@
+%{
+    #include<stdio.h>
+    extern FILE *yyin;
+%}
+
+%%
+"int"|"float"|"double"|"return"|"char"|"if"|"else"|"ifelse"|"printf" {printf("%s keyword detected\n",yytext);}
+[ \t\n\r]+ ;
+. ;
+%%
+
+int yywrap() {
+    return 1;
+}
+
+int main(){
+    yyin = fopen("input.c","r");
+    yylex();
+    return 1;
+}

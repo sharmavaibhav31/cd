@@ -1,0 +1,168 @@
+LLVM intermediate code:
+
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Verifier.h>
+
+using namespace llvm;
+
+int main() {
+    LLVMContext context;
+    Module *module = new Module("ArithmeticModule", context);
+    IRBuilder<> builder(context);
+
+    // Build instructions
+    FunctionType *funcType = FunctionType::get(builder.getInt32Ty(), false);
+    Function *mainFunc = Function::Create(funcType, Function::ExternalLinkage, "main", module);
+
+    BasicBlock *entry = BasicBlock::Create(context, "entry", mainFunc);
+    builder.SetInsertPoint(entry);
+
+    // Value a
+    Value *a = builder.CreateAlloca(builder.getInt32Ty(), nullptr, "a");
+    // Value b
+    Value *b = builder.CreateAlloca(builder.getInt32Ty(), nullptr, "b");
+    // Value c
+    Value *c = builder.CreateAlloca(builder.getInt32Ty(), nullptr, "c");
+
+    builder.CreateStore(ConstantInt::get(context, APInt(32, 10)), a);
+    builder.CreateStore(ConstantInt::get(context, APInt(32, 20)), b);
+    builder.CreateStore(ConstantInt::get(context, APInt(32, 30)), c);
+
+    Value *a_vol = builder.CreateLoad(builder.getInt32Ty(), a, "a_vol");
+    Value *b_vol = builder.CreateLoad(builder.getInt32Ty(), b, "b_vol");
+    Value *c_vol = builder.CreateLoad(builder.getInt32Ty(), c, "c_vol");
+
+    Value *mul = builder.CreateMul(b_vol, c_vol, "mul_tmp");
+    Value *add = builder.CreateAdd(a_vol, mul, "add_tmp");
+
+    builder.CreateRet(add);
+
+    verifyFunction(*mainFunc);
+
+    module->print(outs(), nullptr);
+
+    delete module;
+    return 0;
+}
+
+ command to run:
+ clang++ main.cpp `llvm-config --cxxflags --ldflags --system-libs --libs core`
+ 
+ 
+ Output:
+ 
+ ; ModuleID = 'ArithmeticModule'
+source_filename = "ArithmeticModule"
+
+define i32 @main() {
+entry:
+  %a = alloca i32
+  %b = alloca i32
+  %c = alloca i32
+  store i32 10, i32* %a
+  store i32 20, i32* %b
+  store i32 30, i32* %c
+  %a_vol = load i32, i32* %a
+  %b_vol = load i32, i32* %b
+  %c_vol = load i32, i32* %c
+  %mul_tmp = mul i32 %b_vol, %c_vol
+  %add_tmp = add i32 %a_vol, %mul_tmp
+  ret i32 %add_tmp
+}
+
+  
+write a recursive decent parser for the CFG language 
+#include <iostream>
+#include <string>
+#include <cctype>
+using namespace std;
+
+string input;
+int pos = 0;
+void E();
+void Eprime();
+void T();
+void Tprime();
+void F();
+
+char current() {
+    return input[pos];
+}
+
+void error() {
+    cout << "REJECTED\n";
+    exit(1);
+}
+
+void match(char expected) {
+    if (current() == expected)
+        pos++;
+    else
+        error();
+}
+
+void E() {
+    T();
+    Eprime();
+}
+
+void Eprime() {
+    if (current() == '+') {
+        match('+');
+        T();
+        Eprime();
+    }
+}
+
+void T() {
+    F();
+    Tprime();
+}
+
+void Tprime() {
+    if (current() == '*') {
+        match('*');
+        F();
+        Tprime();
+    }
+}
+
+void F() {
+    if (current() == '(') {
+        match('(');
+        E();
+        match(')');
+    }
+    else if (isdigit(current())) {  
+        pos++;
+    }
+    else {
+        error();
+    }
+}
+
+int main() {
+
+    cout << "Enter input: ";
+    cin >> input;
+
+    input += '$';  
+
+    E();
+
+    if (current() == '$')
+        cout << "ACCEPTED\n";
+    else
+        cout << "REJECTED\n";
+
+    return 0;
+}
+
+
+
+
+
+

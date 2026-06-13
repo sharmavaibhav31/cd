@@ -1,0 +1,60 @@
+pgm.l:
+%{
+#include "y.tab.h"
+#include <stdlib.h>
+extern int yylval;
+%}
+
+%%
+
+[0-9]+      { yylval = atoi(yytext); return NUM; }
+[+\-*/()]   { return yytext[0]; }
+\n          { return '\n'; }
+[ \t]       ;   // ignore spaces
+
+%%
+
+int yywrap() {
+    return 1;
+}
+
+pgm.y:
+    %{
+#include <stdio.h>
+#include <stdlib.h>
+
+int yylex();
+void yyerror(const char *s);
+%}
+
+%token NUM
+
+%left '+' '-'
+%left '*' '/'
+
+%%
+
+input:
+    expr '\n'  { printf("Result = %d\n", $1); }
+    ;
+
+expr:
+      expr '+' expr   { $$ = $1 + $3; }
+    | expr '-' expr   { $$ = $1 - $3; }
+    | expr '*' expr   { $$ = $1 * $3; }
+    | expr '/' expr   { $$ = $1 / $3; }
+    | '(' expr ')'    { $$ = $2; }
+    | NUM             { $$ = $1; }
+    ;
+
+%%
+
+void yyerror(const char *s) {
+    printf("Error: %s\n", s);
+}
+
+int main() {
+    printf("Enter expression:\n");
+    yyparse();
+    return 0;
+}

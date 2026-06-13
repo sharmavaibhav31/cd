@@ -1,0 +1,53 @@
+pgm.l:
+
+%{
+#include "y.tab.h"
+#include <stdlib.h>
+#include <stdio.h>
+%}
+
+%%
+"a"      { return A; }
+"b"      { return B; }
+\n       { return '\n'; }
+[ \t]    ;
+.        { return yytext[0]; }
+
+%%
+int yywrap() {
+   return 1;
+}
+
+pgm.y:
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+
+int yylex();
+void yyerror(const char *s);
+%}
+
+%token A B
+
+%%
+
+input:
+    S '\n'  { printf("Valid"); }
+    ;
+
+S: C B | B;
+
+C: C A | A ;
+
+%%
+
+void yyerror(const char *s) {
+    printf("Error: %s\n", s);
+}
+
+int main() {
+    printf("Enter expression:\n");
+    yyparse();
+    return 0;
+}

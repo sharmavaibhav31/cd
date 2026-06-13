@@ -1,0 +1,25 @@
+%{
+    #include<stdio.h>
+%}
+
+%%
+[0-9]+ {int n =atoi(yytext) ;
+        if(n%2==0){
+            printf("number is even\n");
+        }
+        else{
+            printf("number is odd\n");
+        }}
+[ \t\n\r]+ ;
+. ;
+%%
+
+int yywrap() {
+    return 1;
+}
+
+int main(){
+    printf("Enter the input: ");
+    yylex();
+    return 1;
+}
